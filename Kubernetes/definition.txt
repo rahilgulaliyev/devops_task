@@ -1,0 +1,9 @@
+A blue/green deployment strategy for Kubernetes is a technique for safely rolling out updates to a service by using two identical production environments, called "blue" and "green". The service is initially deployed to the "blue" environment, and traffic is directed to it. When a new version of the service is ready to be deployed, it is deployed to the "green" environment. Once the new version is tested and deemed stable, traffic is switched to the "green" environment, making the new version live.
+
+To implement this strategy in Kubernetes, you would create two deployments, one for the "blue" environment and one for the "green" environment. Each deployment would specify the desired number of replicas and the container image to use.
+
+You would also create a service to expose the deployments and a ingress to route the traffic to the service.
+
+To switch between versions, you would simply update the container image in the appropriate deployment and then update the ingress to route traffic to the new version.
+
+The key to this strategy is that the "green" environment is ready to receive traffic at all times, so that the switchover can be made quickly and with minimal disruption.

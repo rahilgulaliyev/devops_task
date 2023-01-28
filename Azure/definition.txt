@@ -1,0 +1,62 @@
+Step 1: Create an Azure Kubernetes Service (AKS) cluster.
+
+Step 2: Create an Azure Function in Python with the following code to put a message to an Azure Storage Queue every minute:
+
+import azure.functions as func
+import json
+from azure.storage.queue import QueueClient
+
+def main(mytimer: func.TimerRequest) -> None:
+    queue_name = "myqueue"
+    storage_account_name = "<storage_account_name>"
+    storage_account_key = "<storage_account_key>"
+    queue_client = QueueClient.from_connection_string(
+        f"DefaultEndpointsProtocol=https;AccountName={storage_account_name};AccountKey={storage_account_key};EndpointSuffix=core.windows.net",
+        queue_name
+    )
+    message = json.dumps({'message': 'Hello World'})
+    queue_client.send_message(message)
+
+Step 3: Create another Azure Function in Python with the following code to load a message from the queue and run a prepared container service to print "Hello World":
+
+import azure.functions as func
+import json
+from azure.storage.queue import QueueClient
+from azure.mgmt.containerinstance import ContainerInstanceManagementClient
+from azure.mgmt.containerinstance.models import (
+    ContainerGroup,
+    Container,
+    EnvironmentVariable,
+    Port,
+    ResourceRequirements,
+    Volume,
+    VolumeMount
+)
+
+def main(myqueue: func.QueueMessage) -> None:
+    message = json.loads(myqueue.get_body().decode('utf-8'))
+    print(message)
+    container_group_name = "mycontainer"
+    container_name = "hello-world"
+    container_image = "docker/hello-world"
+    resource_group_name = "<resource_group_name>"
+    container_instance_client = ContainerInstanceManagementClient(
+        "<azure_credentials>",
+        "<subscription_id>"
+    )
+    container = Container(
+        name=container_name,
+        image=container_image,
+        resources=ResourceRequirements(requests={'cpu': 1, 'memory': 1}),
+    )
+    container_group = ContainerGroup(
+        location="eastus",
+        containers=[container],
+        os_type="Linux",
+        ip_address={"ports": [Port(port=80, protocol="TCP")]},
+    )
+    container_instance_client.container_groups.create_or_update(resource_group_name, container_group_name, container_group)
+
+Step 4: Deploy the Azure Functions in AKS cluster and configure the timer trigger and queue trigger respectively.
+
+Step 5: Test the deployment by sending a message to the queue and check whether the container service is running and printing "Hello World".

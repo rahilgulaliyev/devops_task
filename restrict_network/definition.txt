@@ -1,0 +1,5 @@
+In Kubernetes, networking between pods can be restricted using Network Policies. A Network Policy is a specification of how groups of pods are allowed to communicate with each other and with other network endpoints. Network Policies are implemented using the Kubernetes API and can be defined using YAML files.
+
+For example, the following Network Policy allows pods in the namespace "default" with the label "app=myapp" to only communicate with other pods in the same namespace that have the label "app=myapp":
+
+Enabling Network Policies requires a network plugin that supports them. Some common network plugins that support Network Policies include Calico, Cilium, and Weave Net. These plugins need to be installed in the cluster and configured to use Network Policies.
